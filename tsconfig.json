@@ -1,0 +1,23 @@
+{
+	"extends": "@tsconfig/node-lts/tsconfig.json",
+	"compilerOptions": {
+		"noPropertyAccessFromIndexSignature": true,
+		"baseUrl": "./",
+		"outDir": "./dist",
+		"noUnusedLocals": true,
+		"paths": {
+			"@/*": ["./src/*"],
+			"#/*": ["./tests/*"]
+		},
+		"emitDecoratorMetadata": true,
+		"experimentalDecorators": true,
+		"noUnusedParameters": true,
+		"noImplicitReturns": true,
+		"noImplicitThis": true,
+		"resolveJsonModule": true,
+		"useUnknownInCatchVariables": true,
+		"allowSyntheticDefaultImports": true,
+		"noUncheckedIndexedAccess": true
+	},
+	"exclude": ["./node_modules", "./dist"]
+}
