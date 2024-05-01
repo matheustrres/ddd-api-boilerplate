@@ -1,7 +1,6 @@
-import { Entity } from './entity';
-
-import { type IDomainEvent } from '../events/contracts/domain-event';
-import { DomainEvents } from '../events/domain-events';
+import { Entity } from '@/core/domain/entity';
+import { type IDomainEvent } from '@/core/domain/events/domain-event';
+import { DomainEvents } from '@/core/domain/events/domain-events';
 
 export class AggregateRoot<T> extends Entity<T> {
 	#domainEvents: IDomainEvent[] = [];

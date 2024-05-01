@@ -7,6 +7,8 @@ export abstract class ValueObject<T> {
 		this.props = props;
 	}
 
+	protected abstract validate(props: T): void;
+
 	static create<T, U extends ValueObject<T>>(
 		this: new (props: T) => U,
 		props: T,
@@ -14,5 +16,11 @@ export abstract class ValueObject<T> {
 		return new this(props);
 	}
 
-	protected abstract validate(props: T): void;
+	equals(vo?: ValueObject<T>): boolean {
+		if (!vo || !vo.props) {
+			return false;
+		}
+
+		return JSON.stringify(this.props) === JSON.stringify(vo.props);
+	}
 }

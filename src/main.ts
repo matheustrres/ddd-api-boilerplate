@@ -4,7 +4,7 @@ import {
 	type NestFastifyApplication,
 } from '@nestjs/platform-fastify';
 
-import { AppModule } from './ioC/app.module';
+import { AppModule } from '@/ioC/app.module';
 
 enum ExitStatus {
 	FAILURE = 1,

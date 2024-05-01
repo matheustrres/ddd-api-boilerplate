@@ -1,4 +1,4 @@
-export class AppError extends Error {
+export class ServerError extends Error {
 	readonly message: string;
 	readonly statusCode: number;
 

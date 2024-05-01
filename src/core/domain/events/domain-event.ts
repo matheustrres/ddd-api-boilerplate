@@ -1,4 +1,4 @@
-import { type EntityId } from '../../entities/entity-id';
+import { type EntityId } from '../entity-id';
 
 export interface IDomainEvent {
 	name: string;

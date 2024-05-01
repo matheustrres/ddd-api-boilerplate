@@ -1,7 +1,6 @@
-import { type IDomainEvent } from './contracts/domain-event';
-
-import { type AggregateRoot } from '../entities/aggregate-root';
-import { type EntityId } from '../entities/entity-id';
+import { type AggregateRoot } from '@/core/domain/aggregate-root';
+import { type EntityId } from '@/core/domain/entity-id';
+import { type IDomainEvent } from '@/core/domain/events/domain-event';
 
 type DomainEventCallback = (event: unknown) => void;
 

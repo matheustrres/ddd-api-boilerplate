@@ -1,8 +1,9 @@
-import assert from 'node:assert';
+import { deepStrictEqual, equal, strictEqual } from 'node:assert';
 import { beforeEach, describe, it } from 'node:test';
 
-import { AggregateRoot } from '@/core/domain/entities/aggregate-root';
-import { type IDomainEvent } from '@/core/domain/events/contracts/domain-event';
+import { AggregateRoot } from '@/core/domain/aggregate-root';
+import { EntityId } from '@/core/domain/entity-id';
+import { type IDomainEvent } from '@/core/domain/events/domain-event';
 import { DomainEvents } from '@/core/domain/events/domain-events';
 
 class TestingEvent implements IDomainEvent {
@@ -16,20 +17,30 @@ class TestingEvent implements IDomainEvent {
 	}
 }
 
-class TestingAggregate extends AggregateRoot<any> {
-	constructor(props: any) {
-		super(props);
+class TestingAggregate extends AggregateRoot<{
+	username: string;
+	email: string;
+}> {
+	constructor(props: { username: string; email: string }) {
+		super({
+			id: new EntityId(),
+			props,
+		});
 
 		this.addDomainEvent(new TestingEvent(this));
 	}
 }
 
 describe('DomainEvents', () => {
-	let ag: AggregateRoot<unknown>;
+	let ag: AggregateRoot<{
+		username: string;
+		email: string;
+	}>;
 
 	beforeEach(() => {
 		ag = new TestingAggregate({
-			userName: 'John Doe',
+			username: 'John Doe',
+			email: 'john.doe@gmail.com',
 		});
 
 		DomainEvents.clearHandlers();
@@ -44,7 +55,7 @@ describe('DomainEvents', () => {
 
 		const handlers = DomainEvents.getHandlers();
 
-		assert.equal(handlers.size, 0);
+		equal(handlers.size, 0);
 	});
 
 	it('should dispatch events for an aggregate', () => {
@@ -58,7 +69,7 @@ describe('DomainEvents', () => {
 		DomainEvents.markAggregateForDispatch(ag);
 		DomainEvents.dispatchEventsForAggregateById(ag.id);
 
-		assert.equal(eventWasDispatched, true);
+		equal(eventWasDispatched, true);
 	});
 
 	it('should not dispatch events if aggregate is not marked', () => {
@@ -71,20 +82,20 @@ describe('DomainEvents', () => {
 		DomainEvents.register(cb, TestingEvent.name);
 		DomainEvents.dispatchEventsForAggregateById(ag.id);
 
-		assert.equal(eventWasDispatched, false);
+		equal(eventWasDispatched, false);
 	});
 
 	it('should mark the aggregate for dispatch if it is not already marked', () => {
 		DomainEvents.markAggregateForDispatch(ag);
 
-		assert.strictEqual(DomainEvents.getMarkedAggregates().length, 1);
+		strictEqual(DomainEvents.getMarkedAggregates().length, 1);
 	});
 
 	it('should not duplicate aggregate marking', () => {
 		DomainEvents.markAggregateForDispatch(ag);
 		DomainEvents.markAggregateForDispatch(ag);
 
-		assert.strictEqual(DomainEvents.getMarkedAggregates().length, 1);
+		strictEqual(DomainEvents.getMarkedAggregates().length, 1);
 	});
 
 	it('should register a callback for an event', () => {
@@ -95,6 +106,6 @@ describe('DomainEvents', () => {
 		const handlers = DomainEvents.getHandlers();
 		const testingHandler = handlers.get(TestingEvent.name);
 
-		assert.deepStrictEqual(testingHandler, [cb]);
+		deepStrictEqual(testingHandler, [cb]);
 	});
 });

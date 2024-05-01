@@ -2,8 +2,8 @@ import { type Entity } from '@/core/domain/entities/entity';
 
 export interface Mapper<
 	DomainEntity extends Entity<unknown>,
-	InfraEntity extends object,
+	Model extends object,
 > {
-	toDomain(i: InfraEntity): DomainEntity;
-	toInfra(d: DomainEntity): InfraEntity;
+	toDomain(model: Model): DomainEntity;
+	toInfra(domainEntity: DomainEntity): Model;
 }

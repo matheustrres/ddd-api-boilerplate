@@ -1,50 +1,93 @@
+import { Result } from '@/core/domain/logic/result';
+
+type GuardResponse = string;
+
+export type GuardArgument<Argument = unknown> = {
+	argument: Argument;
+	argumentName: string;
+};
+
+export type GuardArgumentCollection = GuardArgument[];
+
 export class Guard {
-	static isEmpty(value: unknown): value is undefined | null {
-		if (this.#isNullOrUndefined(value)) return true;
-
-		if (this.#isObject(value)) return Object.keys(value).length === 0;
-
-		if (this.#isString(value) || this.#isArray(value))
-			return value.length === 0;
-
-		return false;
+	static againstAtLeast(numChars: number, text: string): Result<GuardResponse> {
+		return text.length >= numChars
+			? Result.ok<GuardResponse>()
+			: Result.fail<GuardResponse>(
+					`Text is not at least ${numChars} characters.`,
+				);
 	}
 
-	static isBetween(
-		value: number | string | unknown[],
+	static againstAtMost(numChars: number, text: string): Result<GuardResponse> {
+		return text.length <= numChars
+			? Result.ok<GuardResponse>()
+			: Result.fail<GuardResponse>(
+					`Text is greater than ${numChars} characters.`,
+				);
+	}
+
+	static againstNullOrUndefined(
+		argument: any,
+		argumentName: string,
+	): Result<GuardResponse> {
+		if (argument === null || argument === undefined) {
+			return Result.fail<GuardResponse>(
+				`Argument {${argumentName}} is null or undefined`,
+			);
+		}
+
+		return Result.ok<GuardResponse>();
+	}
+
+	static againstNullOrUndefinedBulk(
+		argumentCollection: GuardArgumentCollection,
+	): Result<GuardResponse> {
+		for (const { argument, argumentName } of argumentCollection) {
+			const result = this.againstNullOrUndefined(argument, argumentName);
+
+			if (result.isFailure) return result;
+		}
+
+		return Result.ok<GuardResponse>();
+	}
+
+	static greaterThan(minValue: number, actualValue: number): Result<string> {
+		return actualValue > minValue
+			? Result.ok<GuardResponse>()
+			: Result.fail<GuardResponse>(
+					`Number value {${actualValue}} is not greater than {${minValue}}`,
+				);
+	}
+
+	static inRange(
+		num: number,
 		min: number,
 		max: number,
-	): boolean {
-		if (min > max)
-			throw new Error(`Max ${max} should be greater than min ${min}.`);
+		argumentName: string,
+	): Result<GuardResponse> {
+		const isInRange = num >= min && num <= max;
 
-		if (Guard.isEmpty(value))
-			throw new Error(
-				'Cannot check length of a value. Provided value is empty',
+		if (!isInRange) {
+			return Result.fail<GuardResponse>(
+				`${argumentName} is not within range ${min} to ${max}.`,
 			);
+		}
 
-		const valueLength = this.#isNumber(value) ? value : String(value).length;
-
-		return valueLength >= min && valueLength <= max;
+		return Result.ok<GuardResponse>();
 	}
 
-	static #isNumber(value: unknown): value is number {
-		return typeof value === 'number';
-	}
+	static isObject(argumentName: string, value: unknown) {
+		const isNullOrUndefined = this.againstNullOrUndefined(value, argumentName);
 
-	static #isNullOrUndefined(value: unknown): value is undefined | null {
-		return value === null || value === undefined;
-	}
+		if (isNullOrUndefined.isFailure) {
+			return Result.fail<GuardResponse>(isNullOrUndefined.getError()!);
+		}
 
-	static #isString(value: unknown): value is string {
-		return typeof value === 'string';
-	}
+		const isObject = typeof value === 'object';
+		const isArray = Array.isArray(value);
 
-	static #isArray(value: unknown): value is unknown[] {
-		return Array.isArray(value);
-	}
-
-	static #isObject(value: unknown): value is object {
-		return typeof value === 'object' && value !== null && !Array.isArray(value);
+		return isObject && !isArray
+			? Result.ok<GuardResponse>()
+			: Result.fail<GuardResponse>(`${argumentName} is not an object.`);
 	}
 }

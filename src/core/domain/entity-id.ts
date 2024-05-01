@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
-import { type UniqueId } from '@/core/domain/contracts/unique-id';
+import { type UniqueId } from '@/core/domain/ports/unique-id';
 
 export class EntityId implements UniqueId<EntityId> {
 	readonly #value: string;

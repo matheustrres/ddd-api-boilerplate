@@ -8,7 +8,7 @@
 	"license": "MIT",
 	"engines": {
 		"node": "20.x",
-		"pnpm": "8.15.6"
+		"pnpm": "9.0.6"
 	},
 	"scripts": {
 		"build": "nest build -p ./tsconfig.build.json -c ./nest-cli.json -b swc",
