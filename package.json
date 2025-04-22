@@ -7,8 +7,7 @@
 	"main": "./dist/main.js",
 	"license": "MIT",
 	"engines": {
-		"node": "20.x",
-		"pnpm": "9.0.6"
+		"node": "22.x"
 	},
 	"scripts": {
 		"build": "nest build -p ./tsconfig.build.json -c ./nest-cli.json -b swc",
@@ -25,7 +24,9 @@
 		"@nestjs/cli": "^10.3.2",
 		"@nestjs/common": "^10.3.7",
 		"@nestjs/core": "^10.3.7",
-		"@nestjs/platform-fastify": "^10.3.7"
+		"@nestjs/event-emitter": "^3.0.1",
+		"@nestjs/platform-fastify": "^10.3.7",
+		"@paralleldrive/cuid2": "^2.2.2"
 	},
 	"devDependencies": {
 		"@faker-js/faker": "^8.4.1",

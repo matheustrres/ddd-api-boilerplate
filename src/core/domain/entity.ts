@@ -1,47 +1,87 @@
-import { type EntityId } from '@/core/domain/entity-id';
-import { Guard } from '@/core/domain/logic/guard';
+import { type ValueObject } from './value-objects/value-object';
 
-type CreateEntityProps<Props> = {
+type WithoutDates<T> = Omit<T, 'createdAt' | 'updatedAt' | 'deletedAt'>;
+
+export type CreateEntityProps<
+	EntityId extends ValueObject<unknown>,
+	EntityProps,
+> = {
 	id: EntityId;
-	props: Props;
+	props: EntityProps;
+	createdAt?: Date; // allows ‘restore’
+	updatedAt?: Date | null;
+	deletedAt?: Date | null;
 };
 
-export abstract class Entity<Props> {
+export abstract class Entity<
+	EntityId extends ValueObject<unknown>,
+	EntityProps,
+> {
 	readonly id: EntityId;
+	protected readonly props!: EntityProps;
 	readonly createdAt: Date;
 
-	protected readonly props!: Props;
-
-	protected abstract validate(): void;
-
-	constructor({ id, props }: CreateEntityProps<Props>) {
-		this.#ensureProps(props);
-
-		this.props = props;
-
-		this.validate();
-
+	protected constructor({
+		id,
+		props,
+		createdAt,
+	}: CreateEntityProps<EntityId, EntityProps>) {
 		this.id = id;
-		this.createdAt = new Date();
+		this.props = props;
+		this.createdAt = createdAt ?? new Date();
 	}
 
-	copy(): Props {
-		const copyObj = {
-			...this.props,
-		};
-
-		return Object.freeze(copyObj);
+	static isSame<
+		A extends Entity<ValueObject<unknown>, unknown>,
+		B extends Entity<ValueObject<unknown>, unknown>,
+	>(a: A, b: B): boolean {
+		return a.id.equals(b.id);
 	}
 
-	#ensureProps(props: Props): void {
-		const isObject = Guard.isObject('entityProps', props);
+	abstract toObject(): Readonly<EntityProps>;
+}
 
-		if (isObject.isFailure) {
-			throw new Error(isObject.getError());
-		}
+export abstract class UpdatableEntity<
+	EntityId extends ValueObject<unknown>,
+	EntityProps,
+> extends Entity<EntityId, EntityProps> {
+	updatedAt?: Date | null;
 
-		if (typeof props !== 'object') {
-			throw new TypeError('Entity properties should be an object');
-		}
+	protected constructor(
+		props: WithoutDates<CreateEntityProps<EntityId, EntityProps>>,
+	) {
+		super(props);
+		this.updatedAt = null;
+	}
+
+	protected touch(): void {
+		this.updatedAt = new Date();
+	}
+}
+
+export abstract class DeletableEntity<
+	EntityId extends ValueObject<unknown>,
+	EntityProps,
+> extends UpdatableEntity<EntityId, EntityProps> {
+	deletedAt?: Date | null;
+
+	protected constructor(
+		props: WithoutDates<CreateEntityProps<EntityId, EntityProps>>,
+	) {
+		super(props);
+		this.deletedAt = null;
+	}
+
+	protected touch(): void {
+		super.touch();
+	}
+
+	softDelete(): void {
+		this.deletedAt = new Date();
+		this.touch();
+	}
+
+	isDeleted(): boolean {
+		return this.deletedAt !== null;
 	}
 }

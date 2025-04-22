@@ -1,7 +1,14 @@
-import { type EntityId } from '../entity-id';
+export class DomainEvent<T = unknown> {
+	readonly name: string;
+	readonly data: T;
+	readonly createdAt = new Date();
 
-export interface IDomainEvent {
-	name: string;
-	occurredAt: Date;
-	getAggregateId(): EntityId;
+	constructor(name: string, data: T) {
+		this.name = name;
+		this.data = data;
+	}
+
+	getCreatedAt(): Date {
+		return this.createdAt;
+	}
 }
